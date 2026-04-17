@@ -1,0 +1,50 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+
+bool isValid(char* s, int start, int len) {
+    if (len > 3 || len == 0) return false;
+    if (s[start] == '0' && len > 1) return false;
+    int val = 0;
+    for (int i = start; i < start + len; i++) {
+        val = val * 10 + (s[i] - '0');
+    }
+    return val <= 255;
+}
+
+void backtrack(char* s, int start, int step, char* current, char*** results, int* count) {
+    int n = strlen(s);
+    if (step == 4) {
+        if (start == n) {
+            current[strlen(current) - 1] = '\0'; 
+            (*results)[*count] = strdup(current);
+            (*count)++;
+        }
+        return;
+    }
+
+    for (int len = 1; len <= 3; len++) {
+        if (start + len <= n && isValid(s, start, len)) {
+            int old_len = strlen(current);
+            strncat(current, s + start, len);
+            strcat(current, ".");
+            
+            backtrack(s, start + len, step + 1, current, results, count);
+            
+            current[old_len] = '\0';
+        }
+    }
+}
+
+char** restoreIpAddresses(char* s, int* returnSize) {
+    char** results = malloc(sizeof(char*) * 100); 
+    char current[20] = ""; 
+    *returnSize = 0;
+    
+    int n = strlen(s);
+    if (n < 4 || n > 12) return results;
+
+    backtrack(s, 0, 0, current, &results, returnSize);
+    return results;
+}
